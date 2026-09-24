@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:dag;MODE=MySQL;MV_STORE=TRUE;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-h2.sql
+
+logging:
+  level:
+    com.dag: warn
+
+dag:
+  enabled: true
+  demo:
+    enabled: false
+  scheduler:
+    enabled: true
+    interval-ms: 200
+    batch-size: 100
+  executor:
+    threads: 8
+  node:
+    timeout-seconds: 3
+  lock:
+    # 测试无 Redis：使用本地锁降级（异常巡检自动关闭；超时/巡检类用例需真实 Redis 环境）
+    redis-required: false
