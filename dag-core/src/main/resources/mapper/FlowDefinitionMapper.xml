@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dag.core.repository.FlowDefinitionMapper">
+
+    <select id="selectByBiz" resultType="com.dag.core.repository.FlowDefinitionDO">
+        SELECT * FROM flow_definition
+        WHERE biz_type = #{bizType} AND biz_id = #{bizId}
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.dag.core.repository.FlowDefinitionDO">
+        INSERT INTO flow_definition (id, biz_type, biz_id, graph_json, version, status, created_at, updated_at)
+        VALUES (#{id}, #{bizType}, #{bizId}, #{graphJson}, #{version}, #{status}, NOW(), NOW())
+    </insert>
+</mapper>

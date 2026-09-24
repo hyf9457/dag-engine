@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dag.core.repository.TaskMapper">
+
+    <select id="selectByTaskId" resultType="com.dag.core.repository.TaskDO">
+        SELECT * FROM task_instance WHERE task_id = #{taskId}
+    </select>
+
+    <select id="selectByBiz" resultType="com.dag.core.repository.TaskDO">
+        SELECT * FROM task_instance
+        WHERE biz_type = #{bizType} AND biz_id = #{bizId}
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.dag.core.repository.TaskDO">
+        INSERT INTO task_instance (task_id, biz_type, biz_id, graph_json, state, biz_args, started_at, created_at, updated_at)
+        VALUES (#{taskId}, #{bizType}, #{bizId}, #{graphJson}, 'RUNNING', #{bizArgs}, NOW(), NOW(), NOW())
+    </insert>
+
+    <!-- 收敛：RUNNING → 指定终态（CAS，影响行数=1 才算成功；全 SUCCESS→SUCCESS / 任一 FAILED→FAILED / cancel→CANCELLED） -->
+    <update id="converge">
+        UPDATE task_instance
+        SET state = #{state}, finished_at = NOW(), updated_at = NOW()
+        WHERE task_id = #{taskId} AND state = 'RUNNING'
+    </update>
+
+    <!-- 收敛 SUCCESS：仅当无任何非 SUCCESS 节点（单条原子 SQL，子查询一致性读，锁顺序 node(读)+task(写)，避免读-写交叉死锁） -->
+    <update id="convergeSuccess">
+        UPDATE task_instance
+        SET state = 'SUCCESS', finished_at = NOW(), updated_at = NOW()
+        WHERE task_id = #{taskId} AND state = 'RUNNING'
+          AND NOT EXISTS (SELECT 1 FROM node_instance n WHERE n.task_id = #{taskId} AND n.state &lt;&gt; 'SUCCESS')
+    </update>
+
+    <!-- 收敛 FAILED：存在任一 FAILED 节点（单条原子 SQL） -->
+    <update id="convergeFailed">
+        UPDATE task_instance
+        SET state = 'FAILED', finished_at = NOW(), updated_at = NOW()
+        WHERE task_id = #{taskId} AND state = 'RUNNING'
+          AND EXISTS (SELECT 1 FROM node_instance n WHERE n.task_id = #{taskId} AND n.state = 'FAILED')
+    </update>
+
+    <!-- 取消：RUNNING → CANCELLED（CAS） -->
+    <update id="cancel">
+        UPDATE task_instance
+        SET state = 'CANCELLED', finished_at = NOW(), updated_at = NOW()
+        WHERE task_id = #{taskId} AND state = 'RUNNING'
+    </update>
+
+    <!-- 重试：FAILED → RUNNING（CAS，重试是唯一例外路径） -->
+    <update id="resetToRunning">
+        UPDATE task_instance
+        SET state = 'RUNNING', finished_at = NULL, updated_at = NOW()
+        WHERE task_id = #{taskId} AND state = 'FAILED'
+    </update>
+
+    <!-- 兜底扫描：取活跃 RUNNING 任务（LIMIT 防全表） -->
+    <select id="selectRunningTasks" resultType="com.dag.core.repository.TaskDO">
+        SELECT * FROM task_instance
+        WHERE state = 'RUNNING'
+        ORDER BY created_at
+        LIMIT #{limit}
+    </select>
+</mapper>

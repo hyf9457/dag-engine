@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dag.core.repository.NodeMapper">
+
+    <insert id="insertBatch">
+        INSERT INTO node_instance (id, task_id, biz_node_id, handler, state, result, biz_args, time_out, async_type, created_at, updated_at)
+        VALUES
+        <foreach collection="list" item="n" separator=",">
+            (#{n.id}, #{n.taskId}, #{n.bizNodeId}, #{n.handler}, 'PENDING', NULL, #{n.bizArgs}, 0, #{n.asyncType}, NOW(), NOW())
+        </foreach>
+    </insert>
+
+    <select id="selectByTaskId" resultType="com.dag.core.repository.NodeDO">
+        SELECT * FROM node_instance WHERE task_id = #{taskId}
+    </select>
+
+    <select id="selectById" resultType="com.dag.core.repository.NodeDO">
+        SELECT * FROM node_instance WHERE id = #{id}
+    </select>
+
+    <!-- 领取：PENDING → RUNNING（CAS；影响行数=1 才算成功，多实例/双路径防重核心） -->
+    <update id="claim">
+        UPDATE node_instance
+        SET state = 'RUNNING', started_at = NOW(), updated_at = NOW()
+        WHERE id = #{id} AND state = 'PENDING'
+    </update>
+
+    <!-- 同步成功：RUNNING → SUCCESS（CAS） -->
+    <update id="finishSuccess">
+        UPDATE node_instance
+        SET state = 'SUCCESS', result = #{result}, finished_at = NOW(), updated_at = NOW()
+        WHERE id = #{id} AND state = 'RUNNING'
+    </update>
+
+    <!-- 同步失败：RUNNING → FAILED（CAS） -->
+    <update id="finishFailed">
+        UPDATE node_instance
+        SET state = 'FAILED', result = #{result}, finished_at = NOW(), updated_at = NOW()
+        WHERE id = #{id} AND state = 'RUNNING'
+    </update>
+
+    <!-- 异步挂起：RUNNING → WAIT_CONFIRM（CAS，无超时） -->
+    <update id="markWaitConfirm">
+        UPDATE node_instance
+        SET state = 'WAIT_CONFIRM', updated_at = NOW()
+        WHERE id = #{id} AND state = 'RUNNING'
+    </update>
+
+    <!-- 回调确认：WAIT_CONFIRM → SUCCESS（CAS 幂等：重复/晚到影响行数=0） -->
+    <update id="confirmSuccess">
+        UPDATE node_instance
+        SET state = 'SUCCESS', result = #{result}, finished_at = NOW(), updated_at = NOW()
+        WHERE id = #{id} AND state = 'WAIT_CONFIRM'
+    </update>
+
+    <!-- 回调失败：WAIT_CONFIRM → FAILED（CAS） -->
+    <update id="confirmFailed">
+        UPDATE node_instance
+        SET state = 'FAILED', result = #{result}, finished_at = NOW(), updated_at = NOW()
+        WHERE id = #{id} AND state = 'WAIT_CONFIRM'
+    </update>
+
+    <!-- 超时：RUNNING 且超时阈值已过 → FAILED（time_out=1，result=timeout；引擎填写） -->
+    <update id="timeoutFail">
+        UPDATE node_instance
+        SET state = 'FAILED', result = 'timeout', time_out = 1, finished_at = NOW(), updated_at = NOW()
+        WHERE id = #{id} AND state = 'RUNNING' AND started_at &lt; #{deadline}
+    </update>
+
+    <!-- 巡检重置：RUNNING → PENDING（执行器已死，重新调度；CAS 防与完成竞态） -->
+    <update id="resetRunning">
+        UPDATE node_instance
+        SET state = 'PENDING', result = NULL, time_out = 0, started_at = NULL, finished_at = NULL, updated_at = NOW()
+        WHERE id = #{id} AND state = 'RUNNING'
+    </update>
+
+    <!-- 续跑：WAIT_CONFIRM → PENDING（CAS，仅该状态生效） -->
+    <update id="resumePending">
+        UPDATE node_instance
+        SET state = 'PENDING', result = NULL, time_out = 0, started_at = NULL, finished_at = NULL, updated_at = NOW()
+        WHERE id = #{id} AND state = 'WAIT_CONFIRM'
+    </update>
+
+    <!-- 重试 CONTINUE：FAILED / WAIT_CONFIRM → PENDING（已拍板：一并重置），成功节点保留 -->
+    <update id="resetForContinue">
+        UPDATE node_instance
+        SET state = 'PENDING', result = NULL, time_out = 0, started_at = NULL, finished_at = NULL, updated_at = NOW()
+        WHERE task_id = #{taskId} AND state IN ('FAILED', 'WAIT_CONFIRM')
+    </update>
+
+    <!-- 重试 RESTART：任务下全部节点 → PENDING（全量重跑） -->
+    <update id="resetAll">
+        UPDATE node_instance
+        SET state = 'PENDING', result = NULL, time_out = 0, started_at = NULL, finished_at = NULL, updated_at = NOW()
+        WHERE task_id = #{taskId}
+    </update>
+
+    <!-- 取消节点：非终态 → CANCELLED -->
+    <update id="cancelNodes">
+        UPDATE node_instance
+        SET state = 'CANCELLED', finished_at = NOW(), updated_at = NOW()
+        WHERE task_id = #{taskId} AND state IN ('PENDING', 'RUNNING', 'WAIT_CONFIRM')
+    </update>
+
+    <!-- 强制终态（forceFinalize）：任务下全部非终态节点 → 指定终态 -->
+    <update id="finalizeNodes">
+        UPDATE node_instance
+        SET state = #{state}, finished_at = NOW(), updated_at = NOW()
+        WHERE task_id = #{taskId} AND state NOT IN ('SUCCESS', 'FAILED', 'CANCELLED')
+    </update>
+
+    <!-- 巡检扫描：RUNNING 节点（LIMIT 防全表） -->
+    <select id="selectRunningNodes" resultType="com.dag.core.repository.NodeDO">
+        SELECT * FROM node_instance
+        WHERE state = 'RUNNING'
+        ORDER BY started_at
+        LIMIT #{limit}
+    </select>
+</mapper>
