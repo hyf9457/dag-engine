@@ -1,0 +1,10 @@
+target/
+*.class
+*.log
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# 真实环境凭据（含密码），不入库；接入用 application-real.example.yml 模板
+dag-demo/src/test/resources/application-real.yml
