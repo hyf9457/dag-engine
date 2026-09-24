@@ -40,6 +40,7 @@
     <text x="1720" y="90" text-anchor="middle">存储(CAS)</text>
   </g>
 
+  <!-- message row helper -->
   <!-- m1 -->
   <line x1="140" y1="150" x2="408" y2="150" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
   <text x="255" y="138" font-size="13" fill="#333">submit(bizType,bizId,graphJson,bizArgs)</text>

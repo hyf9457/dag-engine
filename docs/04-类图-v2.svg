@@ -202,33 +202,42 @@
 <text x="822" y="1212" font-size="12" fill="#334155">含锁实现选择（装配关系见 04 §3）</text>
 
 <!-- ===== 关系线 ===== -->
+
+<!-- 实现：DagEngineImpl ▷ DagEngine -->
 <path d="M180 225 L180 202" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#impl)"/>
 <text x="190" y="217" font-size="11" fill="#059669">implements</text>
 
+<!-- DagEngineImpl → TaskService / ConfirmService -->
 <path d="M330 262 C 362 262, 362 140, 400 140" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="338" y="192" font-size="11" fill="#475569">提交/控制</text>
 <path d="M330 262 C 360 262, 360 250, 400 250" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="330" y="282" font-size="11" fill="#475569">回调</text>
 
+<!-- TaskService → GraphParser / GraphValidator -->
 <path d="M740 130 C 770 130, 770 107, 810 107" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="748" y="100" font-size="11" fill="#475569">解析</text>
 <path d="M740 160 C 770 160, 770 300, 810 300" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="750" y="232" font-size="11" fill="#475569">校验</text>
 
+<!-- GraphParser → GraphDsl -->
 <path d="M995 135 L995 150" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="1003" y="146" font-size="11" fill="#475569">产出</text>
 
+<!-- GraphValidator → HandlerRegistry -->
 <path d="M995 340 L995 365" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="1003" y="357" font-size="11" fill="#475569">查 handler</text>
 
+<!-- TaskService → NodeExecutor（中列内部垂直） -->
 <path d="M570 190 L570 410" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="580" y="300" font-size="11" fill="#475569">触发执行</text>
 
+<!-- TaskService → TaskStore / NodeStore -->
 <path d="M740 170 C 772 170, 772 520, 810 520" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="748" y="350" font-size="11" fill="#475569">持久化</text>
 <path d="M740 180 C 774 180, 774 620, 810 620" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="752" y="470" font-size="11" fill="#475569">持久化</text>
 
+<!-- NodeExecutor → HandlerRegistry / LockManager / NodeStore / TaskStateMachine -->
 <path d="M740 470 C 770 470, 770 408, 810 408" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="746" y="430" font-size="11" fill="#475569">调 execute</text>
 <path d="M740 505 C 778 505, 778 912, 810 912" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
@@ -238,11 +247,13 @@
 <path d="M570 535 L570 560" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="580" y="551" font-size="11" fill="#475569">终态</text>
 
+<!-- ConfirmService → NodeStore / TaskStateMachine -->
 <path d="M740 245 C 772 245, 772 660, 810 660" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="750" y="430" font-size="11" fill="#475569">CAS 确认</text>
 <path d="M570 290 L570 560" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="580" y="430" font-size="11" fill="#475569">终态</text>
 
+<!-- TaskStateMachine → TaskStore / NodeStore / TraceStore -->
 <path d="M740 590 C 770 590, 770 535, 810 535" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="746" y="555" font-size="11" fill="#475569">收敛 CAS</text>
 <path d="M740 610 C 772 610, 772 700, 810 700" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
@@ -250,22 +261,29 @@
 <path d="M740 630 C 772 630, 772 820, 810 820" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="748" y="720" font-size="11" fill="#475569">写流水</text>
 
+<!-- NodeInspector → LockManager / NodeStore -->
 <path d="M740 700 C 774 700, 774 915, 810 915" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="752" y="840" font-size="11" fill="#475569">探活 tryLock</text>
 <path d="M740 725 C 770 725, 770 730, 810 730" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="746" y="715" font-size="11" fill="#475569">重置/超时</text>
 
+<!-- Scheduler → NodeExecutor -->
 <path d="M570 385 L570 410" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="580" y="401" font-size="11" fill="#475569">trigger</text>
 
+<!-- FallbackScanner → NodeStore / Scheduler -->
 <path d="M740 800 C 772 800, 772 740, 810 740" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="748" y="765" font-size="11" fill="#475569">扫 PENDING</text>
 <path d="M600 770 L600 385" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
 <text x="610" y="580" font-size="11" fill="#475569">trigger</text>
 
+<!-- LockManager 实现 -->
 <path d="M995 965 L995 942" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#impl)"/>
 <text x="1003" y="958" font-size="11" fill="#059669">implements ×2</text>
 
+<!-- 装配：DagAutoConfiguration（连线省略，装配关系见 04 §3 依赖表） -->
+
+<!-- 图例 -->
 <rect x="30" y="1235" width="1150" height="40" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
 <text x="50" y="1260" font-size="12.5" fill="#475569">
 <tspan x="50" dy="0">实线箭头 = 依赖 / 调用（含关系标签）</tspan>
