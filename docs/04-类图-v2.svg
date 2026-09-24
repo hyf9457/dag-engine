@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1220 1290" width="1220" height="1290" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','Microsoft YaHei',system-ui,sans-serif">
+<defs>
+<marker id="call" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#475569"/></marker>
+<marker id="impl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#059669"/></marker>
+<marker id="asmb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#d97706"/></marker>
+</defs>
+<rect x="0" y="0" width="1220" height="1290" fill="#ffffff"/>
+
+<!-- ===== 列标题 ===== -->
+<rect x="30" y="30" width="300" height="26" rx="5" fill="#eef2ff" stroke="#a5b4fc"/>
+<text x="44" y="48" font-size="13" font-weight="600" fill="#4338ca">业务方入口（api）</text>
+<rect x="400" y="30" width="340" height="26" rx="5" fill="#fef3c7" stroke="#fcd34d"/>
+<text x="414" y="48" font-size="13" font-weight="600" fill="#b45309">服务 / 引擎（service · engine）</text>
+<rect x="810" y="30" width="370" height="26" rx="5" fill="#ecfdf5" stroke="#6ee7b7"/>
+<text x="824" y="48" font-size="13" font-weight="600" fill="#047857">支撑组件（dsl · store · lock · config）</text>
+
+<!-- ===== 左列：api ===== -->
+<rect x="30" y="70" width="300" height="130" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="30" y1="96" x2="330" y2="96" stroke="#64748b" stroke-width="1"/>
+<text x="42" y="86" font-size="14" font-weight="600" fill="#0f172a" font-style="italic">«interface» DagEngine</text>
+<text x="42" y="116" font-size="12" fill="#334155">+ submit(bizType, bizId[, graphJson], args)</text>
+<text x="42" y="134" font-size="12" fill="#334155">+ confirm / fail(nodeId, ...) : boolean</text>
+<text x="42" y="152" font-size="12" fill="#334155">+ cancel / retry / resume : boolean</text>
+<text x="42" y="170" font-size="12" fill="#334155">+ getTask / getNodes / getTrace</text>
+<text x="42" y="188" font-size="12" fill="#334155">+ forceFinalize : boolean</text>
+
+<rect x="30" y="225" width="300" height="75" rx="6" fill="#ffffff" stroke="#475569" stroke-width="1.6"/>
+<line x1="30" y1="249" x2="330" y2="249" stroke="#475569" stroke-width="1"/>
+<text x="42" y="239" font-size="14" font-weight="700" fill="#0f172a">DagEngineImpl</text>
+<text x="42" y="268" font-size="12" fill="#334155">- taskService: TaskService</text>
+<text x="42" y="286" font-size="12" fill="#334155">- confirmService: ConfirmService</text>
+
+<rect x="30" y="330" width="300" height="55" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="30" y1="354" x2="330" y2="354" stroke="#64748b" stroke-width="1"/>
+<text x="42" y="344" font-size="14" font-weight="600" fill="#0f172a" font-style="italic">«interface» NodeHandler</text>
+<text x="42" y="374" font-size="12" fill="#334155">+ execute(ctx: NodeContext) : ExecutionResult</text>
+
+<rect x="30" y="410" width="300" height="115" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="30" y1="434" x2="330" y2="434" stroke="#64748b" stroke-width="1"/>
+<text x="42" y="424" font-size="14" font-weight="600" fill="#0f172a">NodeContext</text>
+<text x="42" y="454" font-size="12" fill="#334155">- taskId / nodeInstanceId / bizNodeId</text>
+<text x="42" y="472" font-size="12" fill="#334155">- bizType / bizId</text>
+<text x="42" y="490" font-size="12" fill="#334155">- bizArgs : 任务全局参数</text>
+<text x="42" y="508" font-size="12" fill="#334155">- nodeArgs : 节点参数</text>
+<text x="42" y="526" font-size="12" fill="#334155">- upstreamResults : 上游结果</text>
+
+<rect x="30" y="550" width="300" height="75" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="30" y1="574" x2="330" y2="574" stroke="#64748b" stroke-width="1"/>
+<text x="42" y="564" font-size="14" font-weight="600" fill="#0f172a">ExecutionResult</text>
+<text x="42" y="594" font-size="12" fill="#334155">- kind: SUCCESS / FAILURE / PENDING</text>
+<text x="42" y="612" font-size="12" fill="#334155">+ success(data) / failure(err) / pending()</text>
+
+<rect x="30" y="650" width="300" height="55" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="30" y1="674" x2="330" y2="674" stroke="#64748b" stroke-width="1"/>
+<text x="42" y="664" font-size="14" font-weight="600" fill="#0f172a">RetryMode | FinalState</text>
+<text x="42" y="694" font-size="12" fill="#334155">CONTINUE / RESTART · 终态枚举</text>
+
+<rect x="30" y="730" width="300" height="80" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="30" y1="754" x2="330" y2="754" stroke="#64748b" stroke-width="1"/>
+<text x="42" y="744" font-size="14" font-weight="600" fill="#0f172a">TaskInfo</text>
+<text x="42" y="774" font-size="12" fill="#334155">- taskId / bizType / bizId / state</text>
+<text x="42" y="792" font-size="12" fill="#334155">- graphJson / bizArgs</text>
+<text x="42" y="810" font-size="12" fill="#334155">- startedAt / finishedAt</text>
+
+<rect x="30" y="835" width="300" height="95" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="30" y1="859" x2="330" y2="859" stroke="#64748b" stroke-width="1"/>
+<text x="42" y="849" font-size="14" font-weight="600" fill="#0f172a">NodeInfo</text>
+<text x="42" y="879" font-size="12" fill="#334155">- id / taskId / bizNodeId / handler</text>
+<text x="42" y="897" font-size="12" fill="#334155">- state / result / timeOut / asyncType</text>
+<text x="42" y="915" font-size="12" fill="#334155">- startedAt / finishedAt</text>
+
+<rect x="30" y="955" width="300" height="55" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="30" y1="979" x2="330" y2="979" stroke="#64748b" stroke-width="1"/>
+<text x="42" y="969" font-size="14" font-weight="600" fill="#0f172a">DagException : RuntimeException</text>
+<text x="42" y="999" font-size="12" fill="#334155">- code: int（100x/200x/300x/4001/5001）</text>
+
+<!-- ===== 中列：service / engine ===== -->
+<rect x="400" y="80" width="340" height="110" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.4"/>
+<line x1="400" y1="104" x2="740" y2="104" stroke="#f97316" stroke-width="1"/>
+<text x="412" y="94" font-size="14" font-weight="700" fill="#9a3412">TaskService</text>
+<text x="412" y="124" font-size="12" fill="#334155">+ submitFixed / submitCustom : TaskInfo</text>
+<text x="412" y="142" font-size="12" fill="#334155">+ retry / cancel / resume / forceFinalize</text>
+<text x="412" y="160" font-size="12" fill="#334155">+ getTask / getNodes</text>
+<text x="412" y="178" font-size="12" fill="#334155">编排：校验 → 落库 → 触发</text>
+
+<rect x="400" y="215" width="340" height="75" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.2"/>
+<line x1="400" y1="239" x2="740" y2="239" stroke="#f97316" stroke-width="1"/>
+<text x="412" y="229" font-size="14" font-weight="700" fill="#9a3412">ConfirmService</text>
+<text x="412" y="258" font-size="12" fill="#334155">+ confirm(nodeId, json) : boolean</text>
+<text x="412" y="276" font-size="12" fill="#334155">+ fail(nodeId, error) : boolean</text>
+
+<rect x="400" y="315" width="340" height="70" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.2"/>
+<line x1="400" y1="339" x2="740" y2="339" stroke="#f97316" stroke-width="1"/>
+<text x="412" y="329" font-size="14" font-weight="700" fill="#9a3412">Scheduler</text>
+<text x="412" y="358" font-size="12" fill="#334155">+ scanOnce() : 兜底候选</text>
+<text x="412" y="376" font-size="12" fill="#334155">+ trigger(nodeId) : push 入口</text>
+
+<rect x="400" y="410" width="340" height="125" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.6"/>
+<line x1="400" y1="434" x2="740" y2="434" stroke="#f97316" stroke-width="1"/>
+<text x="412" y="424" font-size="14" font-weight="700" fill="#9a3412">NodeExecutor</text>
+<text x="412" y="454" font-size="12" fill="#334155">+ execute(nodeId) : void</text>
+<text x="412" y="472" font-size="12" fill="#334155">- onSuccess / onFailure / onPending</text>
+<text x="412" y="490" font-size="12" fill="#334155">管线：tryLock → CAS 领取 → 调 handler</text>
+<text x="412" y="508" font-size="12" fill="#334155">→ 写终态 + 推进下游 / 收敛</text>
+<text x="412" y="526" font-size="12" fill="#334155">→ 写流水（同事务）</text>
+
+<rect x="400" y="560" width="340" height="75" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.2"/>
+<line x1="400" y1="584" x2="740" y2="584" stroke="#f97316" stroke-width="1"/>
+<text x="412" y="574" font-size="14" font-weight="700" fill="#9a3412">TaskStateMachine</text>
+<text x="412" y="604" font-size="12" fill="#334155">+ onNodeTerminal(taskId, nodeState)</text>
+<text x="412" y="622" font-size="12" fill="#334155">全 SUCCESS → SUCCESS；FAILED → 收敛一次</text>
+
+<rect x="400" y="660" width="340" height="85" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.2"/>
+<line x1="400" y1="684" x2="740" y2="684" stroke="#f97316" stroke-width="1"/>
+<text x="412" y="674" font-size="14" font-weight="700" fill="#9a3412">NodeInspector（统一巡检）</text>
+<text x="412" y="704" font-size="12" fill="#334155">+ inspectOnce()</text>
+<text x="412" y="722" font-size="12" fill="#334155">锁可抢 = 执行器中断 → 重置 PENDING</text>
+<text x="412" y="740" font-size="12" fill="#334155">锁在 + 超时 → FAILED(time_out=1)</text>
+
+<rect x="400" y="770" width="340" height="65" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.2"/>
+<line x1="400" y1="794" x2="740" y2="794" stroke="#f97316" stroke-width="1"/>
+<text x="412" y="784" font-size="14" font-weight="700" fill="#9a3412">FallbackScanner</text>
+<text x="412" y="814" font-size="12" fill="#334155">+ scanOnce() : 崩溃兜底</text>
+<text x="412" y="832" font-size="12" fill="#334155">扫 PENDING 且前驱全 SUCCESS → trigger</text>
+
+<rect x="400" y="860" width="340" height="50" rx="6" fill="#fff7ed" stroke="#f97316" stroke-width="1.2"/>
+<line x1="400" y1="884" x2="740" y2="884" stroke="#f97316" stroke-width="1"/>
+<text x="412" y="874" font-size="14" font-weight="700" fill="#9a3412">ScanRunner</text>
+<text x="412" y="902" font-size="12" fill="#334155">+ start() : 调度 / 巡检 / 兜底三路定时</text>
+
+<!-- ===== 右列：支撑 ===== -->
+<rect x="810" y="80" width="370" height="55" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="810" y1="104" x2="1180" y2="104" stroke="#64748b" stroke-width="1"/>
+<text x="822" y="94" font-size="14" font-weight="600" fill="#0f172a">GraphParser</text>
+<text x="822" y="124" font-size="12" fill="#334155">+ parse(graphJson) : GraphDsl</text>
+
+<rect x="810" y="150" width="370" height="90" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="810" y1="174" x2="1180" y2="174" stroke="#64748b" stroke-width="1"/>
+<text x="822" y="164" font-size="14" font-weight="600" fill="#0f172a">GraphDsl（graph_json 模型）</text>
+<text x="822" y="194" font-size="12" fill="#334155">- nodes: List&lt;NodeDef&gt;</text>
+<text x="822" y="212" font-size="12" fill="#334155">- edges: List&lt;EdgeDef&gt;</text>
+<text x="822" y="230" font-size="12" fill="#334155">+ predecessors() / successors() : Map</text>
+
+<rect x="810" y="265" width="370" height="75" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="810" y1="289" x2="1180" y2="289" stroke="#64748b" stroke-width="1"/>
+<text x="822" y="279" font-size="14" font-weight="600" fill="#0f172a">GraphValidator</text>
+<text x="822" y="309" font-size="12" fill="#334155">+ validate(dsl) : void（规则 1-6）</text>
+<text x="822" y="327" font-size="12" fill="#334155">失败抛 DagException(100x)</text>
+
+<rect x="810" y="365" width="370" height="85" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="810" y1="389" x2="1180" y2="389" stroke="#64748b" stroke-width="1"/>
+<text x="822" y="379" font-size="14" font-weight="600" fill="#0f172a">HandlerRegistry</text>
+<text x="822" y="409" font-size="12" fill="#334155">- applicationContext</text>
+<text x="822" y="427" font-size="12" fill="#334155">+ resolve(handlerName) : NodeHandler</text>
+<text x="822" y="445" font-size="12" fill="#334155">+ exists(handlerName) : boolean</text>
+
+<rect x="810" y="475" width="370" height="115" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="810" y1="499" x2="1180" y2="499" stroke="#64748b" stroke-width="1"/>
+<text x="822" y="489" font-size="14" font-weight="600" fill="#0f172a">TaskStore</text>
+<text x="822" y="519" font-size="12" fill="#334155">+ findByBiz(bizType, bizId) : TaskInfo</text>
+<text x="822" y="537" font-size="12" fill="#334155">+ casTaskState(id, from, to) : boolean</text>
+<text x="822" y="555" font-size="12" fill="#334155">+ countNotSuccess(taskId) : int</text>
+<text x="822" y="573" font-size="12" fill="#334155">+ insertTask(...)</text>
+
+<rect x="810" y="615" width="370" height="135" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="810" y1="639" x2="1180" y2="639" stroke="#64748b" stroke-width="1"/>
+<text x="822" y="629" font-size="14" font-weight="600" fill="#0f172a">NodeStore</text>
+<text x="822" y="659" font-size="12" fill="#334155">+ insertNodes(...)</text>
+<text x="822" y="677" font-size="12" fill="#334155">+ casClaim(id) : PENDING→RUNNING</text>
+<text x="822" y="695" font-size="12" fill="#334155">+ casFinish(id, from, to, result, t)</text>
+<text x="822" y="713" font-size="12" fill="#334155">+ casReset(id, from)</text>
+<text x="822" y="731" font-size="12" fill="#334155">+ findRunning() / batchCancelByTask(...)</text>
+
+<rect x="810" y="775" width="370" height="85" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="810" y1="799" x2="1180" y2="799" stroke="#64748b" stroke-width="1"/>
+<text x="822" y="789" font-size="14" font-weight="600" fill="#0f172a">TraceStore（单表双状态）</text>
+<text x="822" y="819" font-size="12" fill="#334155">+ insertTrace(trace)</text>
+<text x="822" y="837" font-size="12" fill="#334155">+ getTrace(taskId, nodeId)</text>
+<text x="822" y="855" font-size="12" fill="#334155">task_state + node_state 同表</text>
+
+<rect x="810" y="885" width="370" height="55" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="810" y1="909" x2="1180" y2="909" stroke="#64748b" stroke-width="1"/>
+<text x="822" y="899" font-size="14" font-weight="600" fill="#0f172a" font-style="italic">«interface» LockManager</text>
+<text x="822" y="929" font-size="12" fill="#334155">+ tryLock(key) / unlock(key)</text>
+
+<rect x="810" y="965" width="370" height="70" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="810" y1="989" x2="1180" y2="989" stroke="#64748b" stroke-width="1"/>
+<text x="822" y="979" font-size="14" font-weight="600" fill="#0f172a">RedissonLockManager | LocalLockManager</text>
+<text x="822" y="1009" font-size="12" fill="#334155">watchdog 续期（Cluster）· JVM 锁降级</text>
+<text x="822" y="1027" font-size="12" fill="#334155">按 dag.redis-required 配置选择</text>
+
+<rect x="810" y="1060" width="370" height="65" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="810" y1="1084" x2="1180" y2="1084" stroke="#64748b" stroke-width="1"/>
+<text x="822" y="1074" font-size="14" font-weight="600" fill="#0f172a">DagProperties</text>
+<text x="822" y="1104" font-size="12" fill="#334155">- dag.* 全部配置项（02 §6）</text>
+
+<rect x="810" y="1150" width="370" height="70" rx="6" fill="#ffffff" stroke="#64748b"/>
+<line x1="810" y1="1174" x2="1180" y2="1174" stroke="#64748b" stroke-width="1"/>
+<text x="822" y="1164" font-size="14" font-weight="600" fill="#0f172a">DagAutoConfiguration</text>
+<text x="822" y="1194" font-size="12" fill="#334155">@Bean 装配全部组件（连线省略）</text>
+<text x="822" y="1212" font-size="12" fill="#334155">含锁实现选择（装配关系见 04 §3）</text>
+
+<!-- ===== 关系线 ===== -->
+<path d="M180 225 L180 202" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#impl)"/>
+<text x="190" y="217" font-size="11" fill="#059669">implements</text>
+
+<path d="M330 262 C 362 262, 362 140, 400 140" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="338" y="192" font-size="11" fill="#475569">提交/控制</text>
+<path d="M330 262 C 360 262, 360 250, 400 250" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="330" y="282" font-size="11" fill="#475569">回调</text>
+
+<path d="M740 130 C 770 130, 770 107, 810 107" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="748" y="100" font-size="11" fill="#475569">解析</text>
+<path d="M740 160 C 770 160, 770 300, 810 300" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="750" y="232" font-size="11" fill="#475569">校验</text>
+
+<path d="M995 135 L995 150" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="1003" y="146" font-size="11" fill="#475569">产出</text>
+
+<path d="M995 340 L995 365" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="1003" y="357" font-size="11" fill="#475569">查 handler</text>
+
+<path d="M570 190 L570 410" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="580" y="300" font-size="11" fill="#475569">触发执行</text>
+
+<path d="M740 170 C 772 170, 772 520, 810 520" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="748" y="350" font-size="11" fill="#475569">持久化</text>
+<path d="M740 180 C 774 180, 774 620, 810 620" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="752" y="470" font-size="11" fill="#475569">持久化</text>
+
+<path d="M740 470 C 770 470, 770 408, 810 408" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="746" y="430" font-size="11" fill="#475569">调 execute</text>
+<path d="M740 505 C 778 505, 778 912, 810 912" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="752" y="760" font-size="11" fill="#475569">tryLock</text>
+<path d="M740 500 C 772 500, 772 650, 810 650" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="746" y="580" font-size="11" fill="#475569">CAS 状态</text>
+<path d="M570 535 L570 560" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="580" y="551" font-size="11" fill="#475569">终态</text>
+
+<path d="M740 245 C 772 245, 772 660, 810 660" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="750" y="430" font-size="11" fill="#475569">CAS 确认</text>
+<path d="M570 290 L570 560" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="580" y="430" font-size="11" fill="#475569">终态</text>
+
+<path d="M740 590 C 770 590, 770 535, 810 535" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="746" y="555" font-size="11" fill="#475569">收敛 CAS</text>
+<path d="M740 610 C 772 610, 772 700, 810 700" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="748" y="648" font-size="11" fill="#475569">全 SUCCESS 检查</text>
+<path d="M740 630 C 772 630, 772 820, 810 820" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="748" y="720" font-size="11" fill="#475569">写流水</text>
+
+<path d="M740 700 C 774 700, 774 915, 810 915" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="752" y="840" font-size="11" fill="#475569">探活 tryLock</text>
+<path d="M740 725 C 770 725, 770 730, 810 730" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="746" y="715" font-size="11" fill="#475569">重置/超时</text>
+
+<path d="M570 385 L570 410" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="580" y="401" font-size="11" fill="#475569">trigger</text>
+
+<path d="M740 800 C 772 800, 772 740, 810 740" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="748" y="765" font-size="11" fill="#475569">扫 PENDING</text>
+<path d="M600 770 L600 385" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#call)"/>
+<text x="610" y="580" font-size="11" fill="#475569">trigger</text>
+
+<path d="M995 965 L995 942" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#impl)"/>
+<text x="1003" y="958" font-size="11" fill="#059669">implements ×2</text>
+
+<rect x="30" y="1235" width="1150" height="40" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+<text x="50" y="1260" font-size="12.5" fill="#475569">
+<tspan x="50" dy="0">实线箭头 = 依赖 / 调用（含关系标签）</tspan>
+<tspan x="380" dy="0">绿色虚线三角 = 实现（implements）</tspan>
+<tspan x="690" dy="0">装配关系见 04 文档 §3 依赖表（图略）</tspan>
+</text>
+</svg>

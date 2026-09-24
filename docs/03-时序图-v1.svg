@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1180" viewBox="0 0 1900 1180" font-family="Microsoft YaHei, Segoe UI, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#333"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0a7d32"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1900" height="1180" fill="#ffffff"/>
+  <text x="950" y="42" text-anchor="middle" font-size="26" font-weight="bold" fill="#111">DAG 流程引擎 · 提交自定义流程 → push 推进串行（与实现代码调用链一致）</text>
+
+  <!-- lifelines -->
+  <g font-size="15" font-weight="bold" fill="#222">
+    <text x="120" y="92" text-anchor="middle">Biz</text>
+    <text x="430" y="92" text-anchor="middle">DagEngineImpl</text>
+    <text x="760" y="92" text-anchor="middle">Scheduler/Claim</text>
+    <text x="1090" y="92" text-anchor="middle">NodeExecutor</text>
+    <text x="1410" y="92" text-anchor="middle">NodeHandler</text>
+    <text x="1720" y="92" text-anchor="middle">MySQL</text>
+  </g>
+  <line x1="120" y1="110" x2="120" y2="1140" stroke="#aaa" stroke-dasharray="6,5"/>
+  <line x1="430" y1="110" x2="430" y2="1140" stroke="#aaa" stroke-dasharray="6,5"/>
+  <line x1="760" y1="110" x2="760" y2="1140" stroke="#aaa" stroke-dasharray="6,5"/>
+  <line x1="1090" y1="110" x2="1090" y2="1140" stroke="#aaa" stroke-dasharray="6,5"/>
+  <line x1="1410" y1="110" x2="1410" y2="1140" stroke="#aaa" stroke-dasharray="6,5"/>
+  <line x1="1720" y1="110" x2="1720" y2="1140" stroke="#aaa" stroke-dasharray="6,5"/>
+  <g font-size="13" fill="#666">
+    <rect x="55" y="70" width="130" height="30" rx="6" fill="#eef"/>
+    <text x="120" y="90" text-anchor="middle">接入方</text>
+    <rect x="350" y="70" width="160" height="30" rx="6" fill="#eef"/>
+    <text x="430" y="90" text-anchor="middle">门面/编排</text>
+    <rect x="670" y="70" width="180" height="30" rx="6" fill="#eef"/>
+    <text x="760" y="90" text-anchor="middle">调度/领取</text>
+    <rect x="1010" y="70" width="160" height="30" rx="6" fill="#eef"/>
+    <text x="1090" y="90" text-anchor="middle">执行器</text>
+    <rect x="1345" y="70" width="130" height="30" rx="6" fill="#eef"/>
+    <text x="1410" y="90" text-anchor="middle">业务Handler</text>
+    <rect x="1650" y="70" width="140" height="30" rx="6" fill="#eef"/>
+    <text x="1720" y="90" text-anchor="middle">存储(CAS)</text>
+  </g>
+
+  <!-- m1 -->
+  <line x1="140" y1="150" x2="408" y2="150" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="255" y="138" font-size="13" fill="#333">submit(bizType,bizId,graphJson,bizArgs)</text>
+  <line x1="450" y1="180" x2="1700" y2="180" stroke="#999" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+  <text x="1030" y="168" font-size="13" fill="#777">selectByBiz 幂等（已存在→返回已有任务）；parse 1001/1006；validate 1002-1005</text>
+
+  <!-- m2 submitNew -->
+  <line x1="450" y1="215" x2="1700" y2="215" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="930" y="203" font-size="13" fill="#333">operationService.submitNew：insert task(RUNNING) + insertBatch nodes(PENDING) + TASK_SUBMIT 流水（短事务）</text>
+
+  <!-- m3 scheduleTask -->
+  <line x1="450" y1="252" x2="740" y2="252" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="580" y="240" font-size="13" fill="#333">scheduleTask(task)</text>
+
+  <!-- m4 converge fallback -->
+  <line x1="780" y1="285" x2="1700" y2="285" stroke="#0a7d32" stroke-width="1.6" marker-end="url(#arrowGreen)"/>
+  <text x="1180" y="273" font-size="13" fill="#0a7d32">convergeIfNeeded 收敛兜底（单条原子 SQL，幂等；未收敛→null）</text>
+
+  <!-- m5 select nodes -->
+  <line x1="780" y1="320" x2="1700" y2="320" stroke="#999" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+  <text x="1180" y="308" font-size="13" fill="#777">selectByTaskId（节点+状态）；根节点 A 前驱空 → 就绪</text>
+
+  <!-- m6 submitNode -->
+  <line x1="780" y1="355" x2="1070" y2="355" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="900" y="343" font-size="13" fill="#333">submitNode(A) → 线程池</text>
+
+  <!-- m7 tryLock+claim -->
+  <line x1="1110" y1="390" x2="1700" y2="390" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="1330" y="378" font-size="13" fill="#333">tryLock(dag:node:A) → claim(A) CAS PENDING→RUNNING + NODE_CLAIM 流水</text>
+
+  <!-- m8 handler -->
+  <line x1="1110" y1="425" x2="1390" y2="425" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="1210" y="413" font-size="13" fill="#333">execute(NodeContext)</text>
+  <line x1="1390" y1="460" x2="1130" y2="460" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="1220" y="448" font-size="13" fill="#333">ExecutionResult(SUCCESS, result)</text>
+
+  <!-- m9 persistSyncSuccess -->
+  <line x1="1110" y1="495" x2="1700" y2="495" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="1310" y="483" font-size="13" fill="#333">persistSyncSuccess(A)：finishSuccess CAS RUNNING→SUCCESS + convergeIfNeeded（B PENDING→不收敛）+ NODE_SUCCESS 流水（短事务）</text>
+
+  <!-- m10 push -->
+  <line x1="1110" y1="532" x2="780" y2="532" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="900" y="520" font-size="13" fill="#333">pushDownstream(A → B)</text>
+  <line x1="780" y1="567" x2="1070" y2="567" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="880" y="555" font-size="13" fill="#333">前驱 A=SUCCESS → submitNode(B)</text>
+
+  <!-- m11 B exec -->
+  <line x1="1110" y1="602" x2="1700" y2="602" stroke="#333" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="1330" y="590" font-size="13" fill="#333">claim(B) CAS + handler(B) + finishSuccess(B) CAS</text>
+
+  <!-- m12 converge success -->
+  <line x1="1110" y1="637" x2="1700" y2="637" stroke="#0a7d32" stroke-width="1.6" marker-end="url(#arrowGreen)"/>
+  <text x="1330" y="625" font-size="13" fill="#0a7d32">convergeSuccess 单条原子 SQL：全节点 SUCCESS → task RUNNING→SUCCESS + finished_at + NODE_SUCCESS 流水(task_state=SUCCESS)</text>
+
+  <!-- m13 query -->
+  <line x1="140" y1="672" x2="408" y2="672" stroke="#999" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+  <text x="240" y="660" font-size="13" fill="#777">getTask/getTrace 查询 → 终态 SUCCESS</text>
+
+  <!-- legend / notes -->
+  <rect x="60" y="720" width="1780" height="430" rx="10" fill="#fafafa" stroke="#ddd"/>
+  <text x="90" y="756" font-size="16" font-weight="bold" fill="#111">机制要点（与已拍板口径一致）</text>
+  <g font-size="14" fill="#222">
+    <text x="90" y="788">1. 领取顺序：先 tryLock（Redis watchdog 自动续期，缺失降级本地锁）再 CAS claim（行数=1 生效，=0 竞态作废）→ 多副本/双路径天然去重</text>
+    <text x="90" y="816">2. push 推进：节点终态由状态机推动，经 DAG 找下游、前驱全 SUCCESS 才触发；失败分支不推进（任一 FAILED → 任务收敛 FAILED）</text>
+    <text x="90" y="844">3. 异步等待：handler 返回 PENDING → WAIT_CONFIRM（无超时），业务方经 confirm/fail 进程内 API 主动回调（无 HTTP 端点）</text>
+    <text x="90" y="872">4. 收敛兜底：并行节点终态事务基于各自快照可能漏收敛 → 每个推进入口先补一次幂等收敛（EX-B07 自愈，最多延迟一个扫描周期）</text>
+    <text x="90" y="900">5. 兜底扫描：ScanRunner 周期 scanAndSchedule（先补收敛，再领就绪 PENDING）——崩溃丢失的推进由扫描重触发</text>
+    <text x="90" y="928">6. 统一巡检 NodeInspector：对 RUNNING 节点 tryLock(0) —— 抢到=执行器已死→重置 PENDING（不误判超时）；抢不到=存活→超时判定 FAILED(time_out=1)</text>
+    <text x="90" y="956">7. 短事务：节点终态 + 收敛 + 流水同事务原子提交；提交前崩溃则节点终态未生效，由巡检/兜底重新处理</text>
+    <text x="90" y="984">8. 重试/取消/续跑/强制终态为三人工出口+重试：仅 FAILED 可 retry（CONTINUE 重置 FAILED+WAIT_CONFIRM / RESTART 全重置），仅 RUNNING 可 cancel，仅 WAIT_CONFIRM 可 resume</text>
+    <text x="90" y="1012">9. 状态收敛态：全 SUCCESS→SUCCESS、任一 FAILED→FAILED（CAS 一次）、cancel→CANCELLED、其余→RUNNING；重试是唯一例外路径 FAILED→RUNNING</text>
+    <text x="90" y="1040">10. 流水单表双状态：task_trace 同时记录 task_state 与 node_state；重试/巡检重置以 source=retry/retry-restart/inspect 标注</text>
+    <text x="90" y="1068">11. 其余时序（并行分支/汇聚、异步回调、重试/取消/续跑、巡检、兜底收敛）见本文档 Mermaid 图 §2-§6</text>
+  </g>
+</svg>
