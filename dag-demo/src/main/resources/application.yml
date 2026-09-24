@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: dag-demo
+  datasource:
+    url: jdbc:mysql://localhost:3306/dag_engine?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+
+logging:
+  level:
+    com.dag: info
+
+dag:
+  enabled: true
+  scheduler:
+    enabled: true
+    interval-ms: 1000
+    batch-size: 100
+  executor:
+    threads: 8
+  node:
+    timeout-seconds: 10
+  lock:
+    # 单机演示用 false；多实例部署请置 true 并配置 Redis（Cluster 填 redis-cluster-addresses）
+    redis-required: false
+    redis-address: redis://localhost:6379
+    redis-cluster-addresses:
